@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ứng Dụng Chuyển Văn Bản Thành Giọng Nói</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0; padding: 20px; }
+        .container { max-width: 600px; margin: 0 auto; }
+        h1 { text-align: center; }
+        button { padding: 10px 20px; margin-top: 10px; cursor: pointer; }
+        textarea { width: 100%; height: 100px; margin-top: 10px; }
+        select { margin-top: 10px; }
+        .audio-player { margin-top: 20px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Chuyển Văn Bản Thành Giọng Nói</h1>
+
+    <h3>Nhập Văn Bản</h3>
+    <form id="text-form" method="POST" action="/convert-text">
+        <textarea id="text-input" name="text" placeholder="Nhập văn bản cần chuyển thành giọng nói..." required></textarea>
+        
+        <h3>Chọn Giọng Nói</h3>
+        <select name="voice" id="voice-select">
+            {% for voice in voices %}
+            <option value="{{ voice.name }}">{{ voice.name }}</option>
+            {% endfor %}
+        </select>
+
+        <button type="submit">Chuyển Văn Bản Thành Giọng Nói</button>
+    </form>
+
+    <br>
+
+    <h3>Tải Lên File Văn Bản</h3>
+    <form id="file-upload-form" action="/upload-text" method="POST" enctype="multipart/form-data">
+        <input type="file" name="file" accept=".txt" required />
+        <button type="submit">Tải Lên File Văn Bản</button>
+    </form>
+
+    {% if text %}
+    <h3>Văn Bản Đã Tải Lên</h3>
+    <textarea readonly>{{ text }}</textarea>
+    <button id="convert-uploaded-text">Chuyển Đổi Văn Bản Đã Tải Lên</button>
+    {% endif %}
+
+    <div id="audio-container" class="audio-player">
+        <!-- File audio sẽ được hiển thị ở đây khi hoàn thành -->
+    </div>
+
+</div>
+
+<script>
+    // Gửi yêu cầu và phát âm thanh
+    const textForm = document.getElementById('text-form');
+    textForm.addEventListener('submit', function(event) {
+        event.preventDefault();
+
+        const text = document.getElementById('text-input').value;
+        const voice = document.getElementById('voice-select').value;
+
+        fetch('/convert-text', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: `text=${encodeURIComponent(text)}&voice=${encodeURIComponent(voice)}`
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.audio_url) {
+                document.getElementById('audio-container').innerHTML = `
+                    <audio controls>
+                        <source src="${data.audio_url}" type="audio/wav">
+                        Your browser does not support the audio element.
+                    </audio>
+                    <br><br>
+                    <a href="${data.audio_url}" download>Download Audio</a>
+                `;
+            }
+        });
+    });
+
+    // Chuyển đổi văn bản đã tải lên
+    const convertUploadedTextButton = document.getElementById('convert-uploaded-text');
+    if (convertUploadedTextButton) {
+        convertUploadedTextButton.addEventListener('click', function() {
+            const text = document.querySelector('textarea[readonly]').value;
+            const voice = document.getElementById('voice-select').value;
+
+            fetch('/convert-text', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: `text=${encodeURIComponent(text)}&voice=${encodeURIComponent(voice)}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.audio_url) {
+                    document.getElementById('audio-container').innerHTML = `
+                        <audio controls>
+                            <source src="${data.audio_url}" type="audio/wav">
+                            Your browser does not support the audio element.
+                        </audio>
+                        <br><br>
+                        <a href="${data.audio_url}" download>Download Audio</a>
+                    `;
+                }
+            });
+        });
+    }
+</script>
+
+</body>
+</html>
