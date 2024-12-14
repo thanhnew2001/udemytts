@@ -56,4 +56,4 @@ def download_audio(filename):
     return send_file(os.path.join(AUDIO_FOLDER, filename), as_attachment=True)
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(port=6000)
