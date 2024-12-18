@@ -4,96 +4,80 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ứng Dụng Chuyển Văn Bản Thành Giọng Nói</title>
-    <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        .spinner-border {
+        #loading {
             display: none;
+            text-align: center;
+            margin-top: 20px;
         }
         .audio-player {
             margin-top: 20px;
         }
-        textarea {
-            resize: none;
-        }
     </style>
 </head>
 <body>
-<div class="container mt-5">
-    <!-- Big Title -->
-    <div class="text-center">
-        <h1 class="display-4 text-primary">✨ Ứng Dụng Chuyển Văn Bản Thành Giọng Nói ✨</h1>
-        <p class="lead text-muted">Tạo tệp âm thanh từ văn bản hoặc tải lên file văn bản chỉ trong vài giây!</p>
-        <hr>
+<div class="container mt-4">
+    <h1 class="text-center">Chuyển Văn Bản Thành Giọng Nói</h1>
+
+    <form id="text-form" method="POST" action="/convert-text">
+        <div class="mb-3">
+            <label for="text-input" class="form-label">Nhập Văn Bản Hoặc Tải Lên File</label>
+            <textarea id="text-input" name="text" class="form-control" placeholder="Nhập văn bản cần chuyển thành giọng nói..." required></textarea>
+        </div>
+
+        <div class="mb-3">
+            <label for="file-upload" class="form-label">Tải Lên File Văn Bản (.txt)</label>
+            <input type="file" id="file-upload" class="form-control" accept=".txt">
+        </div>
+
+        <div class="mb-3">
+            <label for="voice-select" class="form-label">Chọn Giọng Nói</label>
+            <select name="voice" id="voice-select" class="form-select">
+                {% for voice in voices %}
+                <option value="{{ voice.name }}">{{ voice.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <button type="submit" id="convert-btn" class="btn btn-primary w-100">Chuyển Văn Bản Thành Giọng Nói</button>
+    </form>
+
+    <div id="loading">
+        <p>Đang xử lý... Vui lòng chờ.</p>
+        <div class="spinner-border" role="status"></div>
     </div>
 
-    <!-- Text to Speech Form -->
-    <div class="card shadow p-4">
-        <h3>Nhập Văn Bản</h3>
-        <form id="text-form" method="POST" action="/convert-text">
-            <div class="mb-3">
-                <textarea id="text-input" name="text" class="form-control" placeholder="Nhập văn bản cần chuyển thành giọng nói..." required></textarea>
-            </div>
-            <div class="mb-3">
-                <label for="voice-select" class="form-label">Chọn Giọng Nói</label>
-                <select name="voice" id="voice-select" class="form-select">
-                    {% for voice in voices %}
-                    <option value="{{ voice.name }}">{{ voice.name }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-            <div class="d-flex align-items-center">
-                <button type="submit" class="btn btn-primary me-3" id="generate-button">Chuyển Văn Bản Thành Giọng Nói</button>
-                <div class="spinner-border text-primary" role="status" id="loading-spinner">
-                    <span class="visually-hidden">Loading...</span>
-                </div>
-            </div>
-        </form>
-    </div>
-
-    <br>
-
-    <!-- File Upload Form -->
-    <div class="card shadow p-4 mt-4">
-        <h3>Tải Lên File Văn Bản</h3>
-        <form id="file-upload-form" action="/upload-text" method="POST" enctype="multipart/form-data">
-            <div class="mb-3">
-                <input type="file" name="file" accept=".txt" class="form-control" required />
-            </div>
-            <button type="submit" class="btn btn-secondary">Tải Lên File Văn Bản</button>
-        </form>
-    </div>
-
-    {% if text %}
-    <div class="card shadow p-4 mt-4">
-        <h3>Văn Bản Đã Tải Lên</h3>
-        <textarea class="form-control" readonly>{{ text }}</textarea>
-        <button id="convert-uploaded-text" class="btn btn-success mt-3">Chuyển Đổi Văn Bản Đã Tải Lên</button>
-    </div>
-    {% endif %}
-
-    <div id="audio-container" class="audio-player mt-4">
-        <!-- Audio output will appear here -->
-    </div>
+    <div id="audio-container" class="audio-player"></div>
 </div>
 
-<!-- Bootstrap Bundle -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
 <script>
-    // Handle text-to-speech form submission
     const textForm = document.getElementById('text-form');
-    const generateButton = document.getElementById('generate-button');
-    const loadingSpinner = document.getElementById('loading-spinner');
+    const textInput = document.getElementById('text-input');
+    const fileUpload = document.getElementById('file-upload');
+    const convertBtn = document.getElementById('convert-btn');
+    const loadingSpinner = document.getElementById('loading');
 
-    textForm.addEventListener('submit', function(event) {
+    // Handle file upload
+    fileUpload.addEventListener('change', function () {
+        const file = fileUpload.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                textInput.value = e.target.result;
+            };
+            reader.readAsText(file);
+        }
+    });
+
+    // Handle form submission
+    textForm.addEventListener('submit', function (event) {
         event.preventDefault();
 
-        // Disable the button and show the spinner
-        generateButton.disabled = true;
-        loadingSpinner.style.display = 'inline-block';
+        convertBtn.disabled = true;
+        loadingSpinner.style.display = 'block';
 
-        const text = document.getElementById('text-input').value;
+        const text = textInput.value;
         const voice = document.getElementById('voice-select').value;
 
         fetch('/convert-text', {
@@ -105,56 +89,26 @@
         })
         .then(response => response.json())
         .then(data => {
+            loadingSpinner.style.display = 'none';
+            convertBtn.disabled = false;
+
             if (data.audio_url) {
                 document.getElementById('audio-container').innerHTML = `
                     <audio controls>
                         <source src="${data.audio_url}" type="audio/wav">
-                        Your browser does not support the audio element.
+                        Trình duyệt của bạn không hỗ trợ phát âm thanh.
                     </audio>
                     <br><br>
-                    <a href="${data.audio_url}" download class="btn btn-success">Tải Xuống Âm Thanh</a>
+                    <a href="${data.audio_url}" download class="btn btn-success">Tải Xuống</a>
                 `;
             }
         })
         .catch(error => {
-            console.error('Error:', error);
-        })
-        .finally(() => {
-            // Re-enable the button and hide the spinner
-            generateButton.disabled = false;
             loadingSpinner.style.display = 'none';
+            convertBtn.disabled = false;
+            console.error('Error:', error);
         });
     });
-
-    // Handle uploaded text conversion
-    const convertUploadedTextButton = document.getElementById('convert-uploaded-text');
-    if (convertUploadedTextButton) {
-        convertUploadedTextButton.addEventListener('click', function() {
-            const text = document.querySelector('textarea[readonly]').value;
-            const voice = document.getElementById('voice-select').value;
-
-            fetch('/convert-text', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                },
-                body: `text=${encodeURIComponent(text)}&voice=${encodeURIComponent(voice)}`
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.audio_url) {
-                    document.getElementById('audio-container').innerHTML = `
-                        <audio controls>
-                            <source src="${data.audio_url}" type="audio/wav">
-                            Your browser does not support the audio element.
-                        </audio>
-                        <br><br>
-                        <a href="${data.audio_url}" download class="btn btn-success">Tải Xuống Âm Thanh</a>
-                    `;
-                }
-            });
-        });
-    }
 </script>
 </body>
 </html>
