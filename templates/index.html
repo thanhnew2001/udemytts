@@ -22,32 +22,16 @@
 </head>
 <body>
     <!-- Header Section -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-        <div class="container-fluid">
-            <a class="navbar-brand" href="#">Chuyển Văn Bản Thành Giọng Nói</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item">
-                        <a class="nav-link active" href="#">Trang Chủ</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#about">Giới Thiệu</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#contact">Liên Hệ</a>
-                    </li>
-                </ul>
-            </div>
-        </div>
-    </nav>
+    <div class="container mt-5 text-center">
+    <h1 class="display-4 fw-bold text-primary">⌨️ Text To Speech - Chuyển văn bản thành giọng nói App 🎵</h1>
+    <p class="lead text-muted">Dễ dàng tạo giọng bằng cách tải lên văn bản hoặc nhập vào.</p>
+    <hr class="my-4">
+    </div>
 
     <!-- Main Content -->
     <div class="container mt-4">
         <h2 class="text-center">Chuyển Văn Bản Thành Giọng Nói</h2>
-        <form id="text-form" method="POST" action="/convert-text">
+        <form id="text-form" method="POST" action="/convert-text" class="p-4 border rounded">
             <div class="mb-3">
                 <label for="text-input" class="form-label">Nhập Văn Bản Hoặc Tải Lên File</label>
                 <textarea id="text-input" name="text" class="form-control" placeholder="Nhập văn bản cần chuyển thành giọng nói..." required></textarea>
