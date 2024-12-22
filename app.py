@@ -10,12 +10,29 @@ AUDIO_FOLDER = 'static/audio/'
 if not os.path.exists(AUDIO_FOLDER):
     os.makedirs(AUDIO_FOLDER)
 
-# Danh sách các giọng nói có sẵn
-voices = [
-    {'name': 'vi_VN-25hours_single-low', 'model': 'voices/vi_VN-25hours_single-low.onnx'},
-    {'name': 'vi_VN-vais1000-medium', 'model': 'voices/vi_VN-vais1000-medium.onnx'},
-    {'name': 'vi_VN-vivos-x_low', 'model': 'voices/vi_VN-vivos-x_low.onnx'}
-]
+import os
+
+# Path to the folder containing .onnx files
+voices_folder = "voices"
+
+# List to hold the voice dictionaries
+voices = []
+
+# Iterate through all files in the voices folder
+for file in os.listdir(voices_folder):
+    if file.endswith(".onnx"):  # Check if the file has a .onnx extension
+        # Extract the name by removing the folder path and extension
+        name = file.replace(".onnx", "").replace("_", "-")
+        # Construct the dictionary for each voice
+        voices.append({
+            "name": name,
+            "model": os.path.join(voices_folder, file)  # Full path to the .onnx file
+        })
+
+# Print the result
+print("# Danh sách các giọng nói có sẵn")
+print("voices =", voices)
+
 
 @app.route('/')
 def index():
