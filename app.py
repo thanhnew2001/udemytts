@@ -54,7 +54,7 @@ def replace_punctuation(text):
         text = text.replace(char, ",")
     
     # Thay nhiều dấu xuống hàng liên tiếp bằng một dấu phẩy
-    text = re.sub(r"\n+", ",", text)
+    text = re.sub(r"\,+", ",", text)
     
     return text
 
