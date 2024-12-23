@@ -56,9 +56,10 @@ def index():
 
 @app.route('/convert-text', methods=['POST'])
 def convert_text():
-    text = request.form['text']
+    text_ = request.form['text']
 
-    text = replace_punctuation(text)
+    text = replace_punctuation(text_)
+    print(text)
     voice_choice = request.form['voice']
     
     # Kiểm tra nếu giọng chọn hợp lệ
