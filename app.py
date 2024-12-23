@@ -33,9 +33,12 @@ for file in os.listdir(voices_folder):
 print("# Danh sách các giọng nói có sẵn")
 print("voices =", voices)
 
+import re
+
 def replace_punctuation(text):
     """
-    Thay thế các ký tự dấu chấm, chấm hỏi, mở ngoặc, đóng ngoặc, xuống hàng bằng dấu phẩy.
+    Thay thế các ký tự dấu chấm, chấm hỏi, mở ngoặc, đóng ngoặc, 
+    và nhiều dấu xuống hàng liên tiếp bằng một dấu phẩy.
     
     Args:
         text (str): Chuỗi đầu vào.
@@ -44,10 +47,15 @@ def replace_punctuation(text):
         str: Chuỗi đã thay thế.
     """
     # Các ký tự cần thay thế
-    characters_to_replace = [".", "?", "(", ")", "\n", "!"]
-    # Thay thế từng ký tự bằng dấu phẩy
+    characters_to_replace = [".", "?", "(", ")"]
+    
+    # Thay thế các ký tự bằng dấu phẩy
     for char in characters_to_replace:
         text = text.replace(char, ",")
+    
+    # Thay nhiều dấu xuống hàng liên tiếp bằng một dấu phẩy
+    text = re.sub(r"\n+", ",", text)
+    
     return text
 
 @app.route('/')
