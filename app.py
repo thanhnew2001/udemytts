@@ -33,6 +33,22 @@ for file in os.listdir(voices_folder):
 print("# Danh sách các giọng nói có sẵn")
 print("voices =", voices)
 
+def replace_punctuation(text):
+    """
+    Thay thế các ký tự dấu chấm, chấm hỏi, mở ngoặc, đóng ngoặc, xuống hàng bằng dấu phẩy.
+    
+    Args:
+        text (str): Chuỗi đầu vào.
+    
+    Returns:
+        str: Chuỗi đã thay thế.
+    """
+    # Các ký tự cần thay thế
+    characters_to_replace = [".", "?", "(", ")", "\n", "!"]
+    # Thay thế từng ký tự bằng dấu phẩy
+    for char in characters_to_replace:
+        text = text.replace(char, ",")
+    return text
 
 @app.route('/')
 def index():
@@ -41,6 +57,8 @@ def index():
 @app.route('/convert-text', methods=['POST'])
 def convert_text():
     text = request.form['text']
+
+    text = replace_punctuation(text)
     voice_choice = request.form['voice']
     
     # Kiểm tra nếu giọng chọn hợp lệ
